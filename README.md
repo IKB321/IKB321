@@ -1,3 +1,250 @@
+ЗАДАНИЕ 1
+
+настройка сети (8 пункт из 12)
+
+Linux: (при установке)
+
+IP адреса: 100.100.100.2/24
+
+Добавить IP: (1 строчка пустая) 2 строка - /24 (255.255.255.0)
+
+Шлюз по умолчанию: 100.100.100.1
+
+DNS-серверы: 94.232.137.105
+
+Домены поиск: пусто
+
+«ДОПОЛНИТЕЛЬНО» - Сетевая подсистема «network manager» (можно еще галочку поставить)
+
+Windows:
+
+Где – в Settings (параметры) – параметры сети 
+
+Edit IP settings
+
+IPv4 on
+
+IP address: 100.100.100.3
+
+Subnet mask: 255.255.255.0
+
+Gateway: 100.100.100.1
+
+Preferred DNS: 94.232.137.105
+
+
+
+ЗАДАНИЕ 2a
+
+Открываем nano / vim, вводим: 
+
+# «su -»
+
+# nano backup.sh
+
+Закидываем скрипт:
+
+#!/bin/bash
+
+
+
+# Функция для вывода справки
+
+show_help() {
+
+    echo "Использование: $0 [-c метод_сжатия] [-o имя_архива] файлы..."
+
+    echo
+
+    echo "Опции:"
+
+    echo "  -c   Метод сжатия: gzip или bzip2 (по умолчанию: gzip)"
+
+    echo "  -o   Имя выходного архива (по умолчанию: archive.tar)"
+
+    echo "  файлы...  Список файлов и директорий для архивации"
+
+}
+
+
+
+# Переменные по умолчанию
+
+compression="gzip"
+
+output_archive="archive.tar"
+
+log_file="archive_log.txt"
+
+
+
+# Обработка аргументов командной строки
+
+while getopts ":c:o:h" opt; do
+
+    case ${opt} in
+
+        c )
+
+            compression=$OPTARG
+
+            ;;
+
+        o )
+
+            output_archive=$OPTARG
+
+            ;;
+
+        h )
+
+            show_help
+
+            exit 0
+
+            ;;
+
+        \? )
+
+            echo "Неверная опция: $OPTARG" 1>&2
+
+            show_help
+
+            exit 1
+
+            ;;
+
+        : )
+
+            echo "Неверная опция: $OPTARG требует аргумент" 1>&2
+
+            show_help
+
+            exit 1
+
+            ;;
+
+    esac
+
+done
+
+shift $((OPTIND -1))
+
+
+
+# Проверка наличия файлов и директорий для архивирования
+
+if [ $# -eq 0 ]; then
+
+    echo "Ошибка: не указаны файлы или директории для архивации" 1>&2
+
+    show_help
+
+    exit 1
+
+fi
+
+
+
+# Выбор метода сжатия
+
+case $compression in
+
+    gzip)
+
+        tar_command="tar -czf"
+
+        ;;
+
+    bzip2)
+
+        tar_command="tar -cjf"
+
+        ;;
+
+    *)
+
+        echo "Ошибка: неподдерживаемый метод сжатия: $compression" 1>&2
+
+        show_help
+
+        exit 1
+
+        ;;
+
+esac
+
+
+
+# Создание архива
+
+$tar_command "$output_archive" "$@"
+
+if [ $? -ne 0 ]; then
+
+    echo "Ошибка: не удалось создать архив" 1>&2
+
+    exit 1
+
+fi
+
+
+
+# Получение размера архива
+
+archive_size=$(du -h "$output_archive" | cut -f1)
+
+
+
+# Запись информации в лог-файл
+
+echo "[$(date)] Создан архив: $output_archive, Размер: $archive_size, Метод: $compression" >> "$log_file"
+
+
+
+# Вывод результата
+
+echo "Архив успешно создан:"
+
+echo "  Архив: $output_archive"
+
+echo "  Размер: $archive_size"
+
+echo "  Метод: $compression"
+
+echo "Запись добавлена в $log_file"
+
+
+
+exit 0
+
+
+
+# chmod +x backup.sh
+
+# mkdir ~/myfolder
+
+# touch ~/myfolder/file1.txt
+
+# touch ~/myfolder/file2.txt
+
+
+
+Запускаем скрипт с дефолтным архивированием:
+
+# ./backup.sh ~/myfolder
+
+
+
+Запускаем скрипт с флагами для bzip2 и указания имени архива:
+
+# ./backup.sh -c bzip2 -o ~/Рабочий\ стол/myfolder_backup.tar.bz2 ~/Рабочий\ стол/myfolder
+
+
+
+archive_log.txt лежит в /root
+
+
 2.	Архивирование и сжатие данных
 a.	Создание скрипта на языке программирования bash для автоматического архивирования и сжатия данных в операционной системе Linux. Скрипт должен принимать на вход список файлов и папок для архивирования, выбирать метод сжатия (например, gzip или bzip2), создавать архив и вносить информацию о созданном архиве в лог-файл с указанием времени выполнения и объема сжатия.
 1. nano archive_script.sh
